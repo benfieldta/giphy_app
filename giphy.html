@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TV GIPHY App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    
+    <div class='container'>
+        <div class='row'>
+            <div id='TVButtons'></div>
+            <br>
+        </div>
+        <div class='row'>
+            <div class='col-lg-9'>
+                <div class='display'></div>
+                <br>
+            </div>
+            <div class='col-lg-3'>
+                <form id='TV-form'>
+                    <label for='newShowInput'>Add a TV show</label>
+                    <input type='text' id='newShowInput'>
+                    <br>
+                    <input id='addShow' type='submit' value='Submit'>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+<script src="https://code.jquery.com/jquery.js"></script>
+    
+<script type="text/javascript"">
+        
+        var showTitle = ['Game of Thrones', 'The Office', 'Mr. Robot', 'Parks and Recreation', 'Narcos', 'Gotham', 'The IT Crowd', 'How I Met Your Mother', 'Seinfeld', 'Stranger Things', 'Friends', 'Homeland'];
+        var currentGif; 
+        var pausedGif; 
+        var animatedGif; 
+        var stillGif;
+
+        function createButtons(){
+            $('#TVButtons').empty();
+            for(var i = 0; i < showTitle.length; i++){
+            var showBtn = $('<button>').text(showTitle[i]).addClass('showBtn').attr({'data-name': showTitle[i]});
+            $('#TVButtons').append(showBtn);
+        }
+
+        $('.showBtn').on('click', function(){
+            $('.display').empty();
+
+            var thisShow = $(this).data('name');
+            var giphyURL = "http://api.giphy.com/v1/gifs/search?q=tv+show+" + thisShow + "&limit=10&api_key=ozQYJAfdtaloAIYTrT7EgNCkBNURbDau";
+            $.ajax({url: giphyURL, method: 'GET'}).done(function(giphy){
+                currentGif = giphy.data;
+                $.each(currentGif, function(index,value){
+                    animatedGif= value.images.original.url;
+                    pausedGif = value.images.original_still.url;
+                    var thisRating = value.rating;
+                    if(thisRating == ''){
+                        thisRating = 'unrated';
+                    }
+                    var rating = $('<h5>').html('Rated: '+thisRating).addClass('ratingStyle');
+                    stillGif= $('<img>').attr('data-animated', animatedGif).attr('data-paused', pausedGif).attr('src', pausedGif).addClass('playOnHover');
+                    var fullGifDisplay = $('<button>').append(rating, stillGif);
+                $('.display').append(fullGifDisplay);
+            });
+        });
+    });
+}
+
+$(document).on('mouseover','.playOnHover', function(){
+        $(this).attr('src', $(this).data('animated'));
+});
+
+$(document).on('mouseleave','.playOnHover', function(){
+        $(this).attr('src', $(this).data('paused'));
+});
+
+$('#addShow').on('click', function(){
+    var newShow = $('#newShowInput').val().trim();
+    showTitle.push(newShow);
+    createButtons();
+    return false;
+});
+
+createButtons();
+</script>
+</body>
+
+</html>
